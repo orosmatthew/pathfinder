@@ -104,3 +104,22 @@ class Grid:
         self._draw_walls()
         for sprite in self.movable_items:
             sprite.draw()
+
+    def start_pos(self) -> tuple[int, int]:
+        return self.world_to_grid(self.robot_sprite.pos)
+
+    def end_pos(self) -> tuple[int, int]:
+        return self.world_to_grid(self.finish_sprite.pos)
+
+    def grid_count(self) -> int:
+        return self._grid_count
+
+    def in_bounds(self, square: tuple[int, int]) -> bool:
+        return 0 <= square[0] <= self._grid_count and 0 <= square[1] <= self._grid_count
+
+    def neighbors(self, square: tuple[int, int]) -> list[tuple[int, int]]:
+        if not self.in_bounds(square):
+            return []
+        potential = [(square[0] + 1, square[1]), (square[0] - 1, square[1]),
+                     (square[0], square[1] + 1), (square[0], square[1] - 1)]
+        return [s for s in potential if self.in_bounds(s) and not self.walls[s[0]][s[1]]]
