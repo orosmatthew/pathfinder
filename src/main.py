@@ -4,6 +4,7 @@ from grid import Grid
 
 
 def main():
+    rl.set_config_flags(rl.ConfigFlags.FLAG_MSAA_4X_HINT)
     rl.init_window(800, 800, "Pathfinder")
     rl.set_target_fps(60)
 
