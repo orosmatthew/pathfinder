@@ -49,12 +49,14 @@ class Grid:
             for item in reversed(self.movable_items):
                 if self.world_to_grid(item.pos) == self.world_to_grid(rl.get_mouse_position()):
                     self.moving_item = item
+                    rl.set_mouse_cursor(rl.MouseCursor.MOUSE_CURSOR_POINTING_HAND)
                     break
 
         if self.moving_item is not None and rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT):
             grid_pos = self.world_to_grid(self._clamped_mouse_position())
             self.moving_item.pos = rl.Vector2(grid_pos[0] * self.square_size(), grid_pos[1] * self.square_size())
             self.moving_item = None
+            rl.set_mouse_cursor(rl.MouseCursor.MOUSE_CURSOR_DEFAULT)
 
         if self.moving_item is not None:
             self.moving_item.pos = rl.vector2_subtract(self._clamped_mouse_position(),
