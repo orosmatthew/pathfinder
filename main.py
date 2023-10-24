@@ -1,4 +1,5 @@
 import pyray as rl
+from enum import Enum
 
 GRID_SIZE = 800
 GRID_COUNT = 16
@@ -16,6 +17,13 @@ def draw_grid(size: int, padding: int, color: rl.Color):
 
 def world_to_grid(pos: rl.Vector2) -> tuple[int, int]:
     return int(pos.x // GRID_SQUARE_SIZE), int(pos.y // GRID_SQUARE_SIZE)
+
+
+def clamped_mouse_position() -> rl.Vector2:
+    return rl.vector2_clamp(rl.get_mouse_position(),
+                            rl.Vector2(GRID_SQUARE_SIZE / 2, GRID_SQUARE_SIZE / 2),
+                            rl.Vector2(GRID_SIZE - GRID_SQUARE_SIZE / 2,
+                                       GRID_SIZE - GRID_SQUARE_SIZE / 2))
 
 
 class Sprite:
@@ -40,21 +48,51 @@ class MovableHandler:
                     break
 
         if self.moving_item is not None and rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT):
-            clamped_mouse_pos = rl.vector2_clamp(rl.get_mouse_position(),
-                                                 rl.Vector2(GRID_SQUARE_SIZE / 2, GRID_SQUARE_SIZE / 2),
-                                                 rl.Vector2(GRID_SIZE - GRID_SQUARE_SIZE / 2,
-                                                            GRID_SIZE - GRID_SQUARE_SIZE / 2))
-            grid_pos = world_to_grid(clamped_mouse_pos)
+            grid_pos = world_to_grid(clamped_mouse_position())
             self.moving_item.pos = rl.Vector2(grid_pos[0] * GRID_SQUARE_SIZE, grid_pos[1] * GRID_SQUARE_SIZE)
             self.moving_item = None
 
         if self.moving_item is not None:
-            clamped_mouse_pos = rl.vector2_clamp(rl.get_mouse_position(),
-                                                 rl.Vector2(GRID_SQUARE_SIZE / 2, GRID_SQUARE_SIZE / 2),
-                                                 rl.Vector2(GRID_SIZE - GRID_SQUARE_SIZE / 2,
-                                                            GRID_SIZE - GRID_SQUARE_SIZE / 2))
-            self.moving_item.pos = rl.vector2_subtract(clamped_mouse_pos,
+            self.moving_item.pos = rl.vector2_subtract(clamped_mouse_position(),
                                                        rl.Vector2(GRID_SQUARE_SIZE / 2, GRID_SQUARE_SIZE / 2))
+
+
+class WallManager:
+    class State(Enum):
+        NONE = 0
+        PLACING = 1
+        REMOVING = 2
+
+    def __init__(self):
+        self.walls = [[False] * GRID_COUNT for _ in range(GRID_COUNT)]
+        self.state = WallManager.State.NONE
+
+    def handle(self):
+        if self.state == WallManager.State.NONE and rl.is_mouse_button_pressed(rl.MouseButton.MOUSE_BUTTON_LEFT):
+            grid_pos = world_to_grid(rl.get_mouse_position())
+            if not self.walls[grid_pos[0]][grid_pos[1]]:
+                self.state = WallManager.State.PLACING
+            elif grid_pos:
+                self.state = WallManager.State.REMOVING
+        if self.state == WallManager.State.PLACING:
+            if rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT):
+                self.state = WallManager.State.NONE
+                return
+            grid_pos = world_to_grid(clamped_mouse_position())
+            self.walls[grid_pos[0]][grid_pos[1]] = True
+        elif self.state == WallManager.State.REMOVING:
+            if rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT):
+                self.state = WallManager.State.NONE
+                return
+            grid_pos = world_to_grid(clamped_mouse_position())
+            self.walls[grid_pos[0]][grid_pos[1]] = False
+
+    def draw(self):
+        for x in range(GRID_COUNT):
+            for y in range(GRID_COUNT):
+                if self.walls[x][y]:
+                    rl.draw_rectangle(x * GRID_SQUARE_SIZE, y * GRID_SQUARE_SIZE,
+                                      GRID_SQUARE_SIZE, GRID_SQUARE_SIZE, rl.GRAY)
 
 
 def main():
@@ -75,11 +113,16 @@ def main():
     movable_handler = MovableHandler()
     movable_items: list[Sprite] = [finish, robot]
 
+    wall_manager = WallManager()
+
     while not rl.window_should_close():
         movable_handler.handle(movable_items)
+        if not movable_handler.moving_item:
+            wall_manager.handle()
         rl.begin_drawing()
         rl.clear_background(rl.Color(252, 251, 251, 255))
         draw_grid(size=GRID_COUNT, padding=2, color=rl.Color(221, 213, 213, 255))
+        wall_manager.draw()
         for item in movable_items:
             item.draw()
         rl.end_drawing()
