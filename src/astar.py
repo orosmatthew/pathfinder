@@ -4,7 +4,7 @@ from grid import Grid
 
 
 def heuristic(a: tuple[int, int], b: tuple[int, int]) -> float:
-    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def pathfind_astar(grid: Grid) -> list[tuple[int, int]] | None:
@@ -38,7 +38,7 @@ def pathfind_astar(grid: Grid) -> list[tuple[int, int]] | None:
         explore_queue.remove(current)
         neighbors = grid.neighbors(current)
         for neighbor in neighbors:
-            tentative_g_score = g_score[current[0]][current[1]]
+            tentative_g_score = g_score[current[0]][current[1]] + 1
             if tentative_g_score < g_score[neighbor[0]][neighbor[1]]:
                 came_from[neighbor] = current
                 g_score[neighbor[0]][neighbor[1]] = tentative_g_score
