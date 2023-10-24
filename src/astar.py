@@ -1,6 +1,6 @@
 import math
 
-from src.grid import Grid
+from grid import Grid
 
 
 def heuristic(a: tuple[int, int], b: tuple[int, int]) -> float:
