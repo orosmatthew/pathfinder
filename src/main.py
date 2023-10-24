@@ -32,14 +32,15 @@ def main():
         grid.update()
         rl.begin_drawing()
         rl.clear_background(rl.Color(252, 251, 251, 255))
-        grid.draw()
+        grid.draw_background()
         if path is not None:
             for i in range(len(path) - 1):
                 rl.draw_line_ex(rl.Vector2(path[i][0] * grid.square_size() + grid.square_size() / 2,
                                            path[i][1] * grid.square_size() + grid.square_size() / 2),
                                 rl.Vector2(path[i + 1][0] * grid.square_size() + grid.square_size() / 2,
-                                           path[i + 1][1] * grid.square_size() + grid.square_size() / 2), 4,
-                                rl.RED)
+                                           path[i + 1][1] * grid.square_size() + grid.square_size() / 2), 8,
+                                rl.Color(198, 120, 221, 255))
+        grid.draw_items()
         rl.end_drawing()
 
 

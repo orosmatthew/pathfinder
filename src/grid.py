@@ -99,9 +99,11 @@ class Grid:
         if not self.moving_item:
             self._handle_walls()
 
-    def draw(self):
+    def draw_background(self):
         self._draw_background(padding=2, color=rl.Color(221, 213, 213, 255))
         self._draw_walls()
+
+    def draw_items(self):
         for sprite in self.movable_items:
             sprite.draw()
 
