@@ -1,30 +1,32 @@
+from queue import PriorityQueue
+
 from grid import Grid
+
+
+def heuristic(a: tuple[int, int], b: tuple[int, int]) -> float:
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def pathfind_greedy_first(grid: Grid) -> list[tuple[int, int]] | None:
     start_pos = grid.start_pos()
     end_pos = grid.end_pos()
 
-    def _greedy_recursive(grid, currentCell, path):
-        path = path.copy()
-        #print("greedy_recursive", currentCell, path)
-        path += [currentCell]
+    visited = {start_pos: None}
+    queue = PriorityQueue()
 
-        neighbors = grid.neighbors(currentCell)
-        #print("     neighbors:",neighbors)
-        if end_pos in neighbors:  # win condition
-            return path + [end_pos]
+    queue.put((heuristic(start_pos, end_pos), start_pos))
 
-        neighbors.sort(key=lambda p: abs(p[0] - end_pos[0]) + abs(p[1] - end_pos[1]))
-        #print("     neighbors_sorted:",neighbors)
-
-        for neighbor in neighbors:
-            if neighbor not in path:  # Don't get stuck in between two cells
-                potential_path = _greedy_recursive(grid, neighbor, path)
-                if potential_path is not None:
-                    return potential_path
-        
-        #print("     Stuck")
-        return None  # Stuck
-
-    return _greedy_recursive(grid, start_pos, [])
+    while not queue.empty():
+        current_node = queue.get()[1]
+        for neighbor in grid.neighbors(current_node):
+            if neighbor not in visited:
+                if neighbor == end_pos:
+                    path = [neighbor, current_node]
+                    while current_node := visited[current_node]:
+                        path.append(current_node)
+                    path.reverse()
+                    return path
+                else:
+                    visited[neighbor] = current_node
+                    queue.put((heuristic(neighbor, end_pos), neighbor))
+    return None
