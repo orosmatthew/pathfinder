@@ -2,7 +2,7 @@ import pyray as rl
 
 from grid import Grid
 from astar import pathfind_astar
-from greedy import pathfind_greedy_first
+from greedy import pathfind_greedy_first, pathfind_greedy_first2, pathfind_greedy_first3
 
 
 def main():
@@ -22,6 +22,10 @@ def main():
 
         if rl.is_key_pressed(rl.KeyboardKey.KEY_G):
             path = pathfind_greedy_first(grid)
+            path_index = 0
+
+        if rl.is_key_pressed(rl.KeyboardKey.KEY_H):
+            path = pathfind_greedy_first3(grid)
             path_index = 0
 
         if path is not None and rl.is_key_pressed(rl.KeyboardKey.KEY_N):
