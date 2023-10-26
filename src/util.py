@@ -7,5 +7,5 @@ class Sprite:
         self.pos = pos
         self.moving = False
 
-    def draw(self):
-        rl.draw_texture(self.texture, round(self.pos.x), round(self.pos.y), rl.WHITE)
+    def draw(self, offset_x=0, offset_y=0):
+        rl.draw_texture(self.texture, round(self.pos.x) + offset_x, round(self.pos.y) + offset_y, rl.WHITE)

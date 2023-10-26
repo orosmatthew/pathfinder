@@ -10,9 +10,11 @@ class Grid:
         PLACING = 1
         REMOVING = 2
 
-    def __init__(self, grid_size: int, grid_count: 16):
+    def __init__(self, grid_size: int, grid_count: 16, draw_x_pos: int, draw_y_pos: int):
         self._grid_size = grid_size
         self._grid_count = grid_count
+        self._draw_x_pos = draw_x_pos
+        self._draw_y_pos = draw_y_pos
 
         self.moving_item: Sprite | None = None
 
@@ -38,8 +40,11 @@ class Grid:
     def world_to_grid(self, pos: rl.Vector2) -> tuple[int, int]:
         return int(pos.x // self.square_size()), int(pos.y // self.square_size())
 
+    def _get_offset_mouse(self):
+        return rl.vector2_subtract(rl.get_mouse_position(), rl.Vector2(self._draw_x_pos, self._draw_y_pos))
+
     def _clamped_mouse_position(self) -> rl.Vector2:
-        return rl.vector2_clamp(rl.get_mouse_position(),
+        return rl.vector2_clamp(self._get_offset_mouse(),
                                 rl.Vector2(self.square_size() / 2, self.square_size() / 2),
                                 rl.Vector2(self._grid_size - self.square_size() / 2,
                                            self._grid_size - self.square_size() / 2))
@@ -47,7 +52,7 @@ class Grid:
     def _handle_movables(self):
         if self.moving_item is None and rl.is_mouse_button_pressed(rl.MouseButton.MOUSE_BUTTON_LEFT):
             for item in reversed(self.movable_items):
-                if self.world_to_grid(item.pos) == self.world_to_grid(rl.get_mouse_position()):
+                if self.world_to_grid(item.pos) == self.world_to_grid(self._get_offset_mouse()):
                     self.moving_item = item
                     rl.set_mouse_cursor(rl.MouseCursor.MOUSE_CURSOR_POINTING_HAND)
                     break
@@ -64,7 +69,7 @@ class Grid:
 
     def _handle_walls(self):
         if self.wall_state == Grid.WallState.NONE and rl.is_mouse_button_pressed(rl.MouseButton.MOUSE_BUTTON_LEFT):
-            grid_pos = self.world_to_grid(rl.get_mouse_position())
+            grid_pos = self.world_to_grid(self._get_offset_mouse())
             if not self.walls[grid_pos[0]][grid_pos[1]]:
                 self.wall_state = Grid.WallState.PLACING
             elif grid_pos:
@@ -86,14 +91,16 @@ class Grid:
     def _draw_background(self, padding: int, color: rl.Color) -> None:
         for x in range(self._grid_count):
             for y in range(self._grid_count):
-                rl.draw_rectangle(x * self.square_size() + padding, y * self.square_size() + padding,
+                rl.draw_rectangle(x * self.square_size() + padding + self._draw_x_pos,
+                                  y * self.square_size() + padding + self._draw_y_pos,
                                   self.square_size() - padding * 2, self.square_size() - padding * 2, color)
 
     def _draw_walls(self):
         for x in range(self._grid_count):
             for y in range(self._grid_count):
                 if self.walls[x][y]:
-                    rl.draw_rectangle(x * self.square_size(), y * self.square_size(),
+                    rl.draw_rectangle(x * self.square_size() + self._draw_x_pos,
+                                      y * self.square_size() + self._draw_y_pos,
                                       self.square_size(), self.square_size(), rl.GRAY)
 
     def update(self):
@@ -107,7 +114,7 @@ class Grid:
 
     def draw_items(self):
         for sprite in self.movable_items:
-            sprite.draw()
+            sprite.draw(self._draw_x_pos, self._draw_y_pos)
 
     def start_pos(self) -> tuple[int, int]:
         return self.world_to_grid(self.robot_sprite.pos)
