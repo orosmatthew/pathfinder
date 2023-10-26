@@ -49,6 +49,13 @@ class Grid:
                                 rl.Vector2(self._grid_size - self.square_size() / 2,
                                            self._grid_size - self.square_size() / 2))
 
+    def _cropped_mouse_position(self):
+        mouse_pos = rl.get_mouse_position()
+        if rl.check_collision_point_rec(mouse_pos, rl.Rectangle(self._draw_x_pos, self._draw_y_pos, self._grid_size,
+                                                                self._grid_size)):
+            return rl.vector2_subtract(mouse_pos, rl.Vector2(self._draw_x_pos, self._draw_y_pos))
+        return None
+
     def _handle_movables(self):
         if self.moving_item is None and rl.is_mouse_button_pressed(rl.MouseButton.MOUSE_BUTTON_LEFT):
             for item in reversed(self.movable_items):
@@ -79,14 +86,18 @@ class Grid:
             if rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT):
                 self.wall_state = Grid.WallState.NONE
                 return
-            grid_pos = self.world_to_grid(self._clamped_mouse_position())
-            self.walls[grid_pos[0]][grid_pos[1]] = True
+            mouse = self._cropped_mouse_position()
+            if mouse is not None:
+                grid_pos = self.world_to_grid(mouse)
+                self.walls[grid_pos[0]][grid_pos[1]] = True
         elif self.wall_state == Grid.WallState.REMOVING:
             if rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT):
                 self.wall_state = Grid.WallState.NONE
                 return
-            grid_pos = self.world_to_grid(self._clamped_mouse_position())
-            self.walls[grid_pos[0]][grid_pos[1]] = False
+            mouse = self._cropped_mouse_position()
+            if mouse is not None:
+                grid_pos = self.world_to_grid(mouse)
+                self.walls[grid_pos[0]][grid_pos[1]] = False
 
     def _draw_background(self, padding: int, color: rl.Color) -> None:
         for x in range(self._grid_count):
