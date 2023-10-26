@@ -3,7 +3,7 @@ import pyray as rl
 from grid import Grid
 from astar import pathfind_astar
 from greedy import pathfind_greedy_first
-
+from dijkstra import pathfind_dijkstra
 
 def main():
     rl.set_config_flags(rl.ConfigFlags.FLAG_MSAA_4X_HINT)
@@ -22,6 +22,9 @@ def main():
 
         if rl.is_key_pressed(rl.KeyboardKey.KEY_G):
             path = pathfind_greedy_first(grid)
+            path_index = 0
+        if rl.is_key_pressed(rl.KeyboardKey.KEY_D):
+            path = pathfind_dijkstra(grid)
             path_index = 0
 
         if path is not None and rl.is_key_pressed(rl.KeyboardKey.KEY_N):
