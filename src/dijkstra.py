@@ -38,13 +38,16 @@ def pathfind_dijkstra(grid: Grid) -> list[tuple[int, int]] | None:
     end_pos = grid.end_pos()
     explore_queue: list[tuple[int, int]] = [start_pos]
     came_from: dict[tuple[int, int], tuple[int, int]] = {}
-    weight = [[math.inf] * grid.grid_count() for _ in range(grid.grid_count())]
+    grid_count = grid.grid_count()
+    weight = [[math.inf] * grid_count for _ in range(grid_count)]
     weight[start_pos[0]][start_pos[1]] = 0
 
     while not len(explore_queue) == 0:
         current = explore_queue[0]
         for node in explore_queue:  # Explore
-            if weight[node[0]][node[1]] < weight[current[0]][current[1]]:
+            weight_node = weight[node[0]][node[1]]
+            weight_current = weight[current[0]][current[1]]
+            if weight_node < weight_current:
                 current = node
 
         if current == end_pos:  # Determine path

@@ -1,8 +1,6 @@
-from queue import PriorityQueue
-
 from grid import Grid
 
-
+# Manhattan distance between two squares ignoring obstacles
 def heuristic(a: tuple[int, int], b: tuple[int, int]) -> float:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -10,23 +8,30 @@ def heuristic(a: tuple[int, int], b: tuple[int, int]) -> float:
 def pathfind_greedy_first(grid: Grid) -> list[tuple[int, int]] | None:
     start_pos = grid.start_pos()
     end_pos = grid.end_pos()
-
-    visited = {start_pos: None}
-    queue = PriorityQueue()
-
-    queue.put((heuristic(start_pos, end_pos), start_pos))
-
-    while not queue.empty():
-        current_node = queue.get()[1]
-        for neighbor in grid.neighbors(current_node):
-            if neighbor not in visited:
+    # keep track what square another square came from
+    came_from = {start_pos: None}
+    # queue of squares to visit
+    queue: list[tuple[int, int]] = [start_pos]
+    # while the queue is not empty
+    while len(queue) != 0:
+        queue.sort(key=lambda s: heuristic(s, end_pos))
+        # remove square with the 
+        #   lowest heuristic from queue
+        current = queue[0]
+        queue.pop(0)
+        # loop through all neighbors
+        for neighbor in grid.neighbors(current):
+            if neighbor not in came_from:
+                # end is found
                 if neighbor == end_pos:
-                    path = [neighbor, current_node]
-                    while current_node := visited[current_node]:
-                        path.append(current_node)
+                    # return reverse of path
+                    path = [neighbor, current]
+                    while current := came_from[current]:
+                        path.append(current)
                     path.reverse()
                     return path
                 else:
-                    visited[neighbor] = current_node
-                    queue.put((heuristic(neighbor, end_pos), neighbor))
+                    # add neighbors to queue
+                    came_from[neighbor] = current
+                    queue.append(neighbor)
     return None
