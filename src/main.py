@@ -1,3 +1,6 @@
+import random
+import time
+
 import pyray as rl
 
 from grid import Grid
@@ -38,6 +41,36 @@ def main():
             path_index = 0
         if rl.gui_button(rl.Rectangle(10 + 120 * 2, 10, 100, 40), "A-Star"):
             path = pathfind_astar(grid)
+            path_index = 0
+
+        if rl.gui_button(rl.Rectangle(10 + 120 * 3 + 40, 10, 100, 40), "Random"):
+            perlin_image = rl.gen_image_perlin_noise(16, 16, random.randint(0, 2 ** 16), random.randint(0, 2 ** 16),
+                                                     5.0)
+            temp_path = None
+            valid = False
+            while not valid:
+                for x in range(16):
+                    for y in range(16):
+                        noise = rl.get_image_color(perlin_image, x, y)
+                        grid.walls[x][y] = noise.r > 150
+                x_range = [*range(16)]
+                y_range = [*range(16)]
+                random.shuffle(x_range)
+                random.shuffle(y_range)
+                for x in x_range:
+                    for y in y_range:
+                        if not grid.walls[x][y]:
+                            grid.robot_sprite.pos = rl.Vector2(x * grid.square_size(), y * grid.square_size())
+                random.shuffle(x_range)
+                random.shuffle(y_range)
+                for x in x_range:
+                    for y in y_range:
+                        if not grid.walls[x][y]:
+                            grid.finish_sprite.pos = rl.Vector2(x * grid.square_size(), y * grid.square_size())
+                temp_path = pathfind_astar(grid)
+                if temp_path is not None:
+                    valid = True
+            path = None
             path_index = 0
 
         if path is not None and path_index + 1 != len(path) and rl.gui_button(
