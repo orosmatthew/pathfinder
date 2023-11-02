@@ -34,13 +34,16 @@ def main():
         rl.begin_drawing()
 
         if rl.gui_button(rl.Rectangle(10, 10, 100, 40), "Greedy"):
-            path = pathfind_greedy_first(grid)
+            path, visited = pathfind_greedy_first(grid)
+            print(visited)
             path_index = 0
         if rl.gui_button(rl.Rectangle(10 + 120, 10, 100, 40), "Dijkstra"):
-            path = pathfind_dijkstra(grid)
+            path, visited = pathfind_dijkstra(grid)
+            print(visited)
             path_index = 0
         if rl.gui_button(rl.Rectangle(10 + 120 * 2, 10, 100, 40), "A-Star"):
-            path = pathfind_astar(grid)
+            path, visited = pathfind_astar(grid)
+            print(visited)
             path_index = 0
 
         if rl.gui_button(rl.Rectangle(10 + 120 * 3 + 40, 10, 100, 40), "Random"):
