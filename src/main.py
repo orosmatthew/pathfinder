@@ -70,7 +70,7 @@ def main():
                     for y in y_range:
                         if not grid.walls[x][y]:
                             grid.finish_sprite.pos = rl.Vector2(x * grid.square_size(), y * grid.square_size())
-                temp_path = pathfind_astar(grid)
+                temp_path, visited = pathfind_astar(grid)
                 if temp_path is not None:
                     valid = True
             path = None
